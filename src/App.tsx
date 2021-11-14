@@ -1,26 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ITodo } from './interfaces';
+import React, {useState} from 'react';
+import { NavBar } from './components/NavBar';
+import { ToDoForm } from './components/ToDoForm';
+import { ToDoList } from './components/ToDoList';
 
-function App() {
+const App: React.FC = () => {
+  const [todos, setTodos] = useState<ITodo[]>([]);
+
+  const addHandle = (title: string) => {
+    const newTodo:ITodo = {
+      title: title,
+      id: Date.now(),
+      completed: false
+    }
+
+    //setTodos([newTodo, ...todos]) затрет старый стейт лучший вариант ниже
+    setTodos(prev => [newTodo, ...prev])
+  }
+
+  const toggleHandler = (id: number) => {
+    setTodos(prev => prev.map(todo => {
+      if (todo.id === id) {
+        return {
+          ...todo,
+          completed: !todo.completed
+        }
+      }
+      return todo
+    }))
+  }
+
+  const removeHandler = (id: number) => {
+    const shouldRemove = window.confirm("Delete TODO?")
+    if (shouldRemove) {
+      setTodos(prev => todos.filter(todo => todo.id !== id))
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <NavBar />
+      <div className='container'>
+        <ToDoForm onAdd={addHandle} />
+        <ToDoList todos={todos} onToggle={toggleHandler} onRemove={removeHandler}/>
+      </div>
+    </>
+  )
 }
 
 export default App;
